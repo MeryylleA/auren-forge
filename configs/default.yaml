@@ -1,0 +1,51 @@
+# auren-forge configuration
+# Run `forge init` to generate this interactively, or edit manually.
+
+project_name: "my-sft-project"
+
+model:
+  name: "unsloth/Llama-3.1-8B-bnb-4bit"
+  max_seq_length: 2048
+  load_in_4bit: true
+
+dataset:
+  source: "yahma/alpaca-cleaned"   # HuggingFace ID or local path
+  format: "auto"                    # auto | alpaca | sharegpt | custom
+  split: "train"
+  # For custom format, uncomment and set column_mapping:
+  # column_mapping:
+  #   instruction: "question"
+  #   output: "answer"
+
+training:
+  lora_rank: 16
+  lora_alpha: 16
+  batch_size: 2
+  gradient_accumulation_steps: 4
+  epochs: 1
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  logging_steps: 10
+  save_steps: 500
+  output_dir: "./output"
+
+agent:
+  provider: "openrouter"
+  api_key: "${OPENROUTER_API_KEY}"     # set env var or paste key directly
+  model: "xiaomi/mimo-v2-pro"          # see README for model options
+  autonomy: "suggest"                  # monitor | suggest | auto
+  check_interval_minutes: 30
+  eval_on_completion: true
+  notification_method: "terminal"
+  max_tokens_per_call: 4096
+  temperature: 0.3
+
+  # For Ollama Cloud instead of OpenRouter, use:
+  # provider: "ollama"
+  # base_url: "https://api.ollama.com"
+  # model: "kimi-k2.5:cloud"
+
+eval:
+  num_test_prompts: 15
+  min_quality_score: 3.0
+  compare_with_previous: true
