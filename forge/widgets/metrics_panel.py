@@ -54,7 +54,7 @@ class MetricsPanel(Static):
             return Table(title="Metrics", box=box.ROUNDED, border_style="#b8860b", expand=True)
 
         table = Table(box=box.ROUNDED, border_style="#b8860b", expand=True, show_header=False)
-        table.add_column("Label", style="#aaa", width=16)
+        table.add_column("Label", style="#aaaaaa", width=16)
         table.add_column("Value", style="bold #f0e68c")
 
         step = d.get("step", 0)

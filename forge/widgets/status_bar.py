@@ -31,8 +31,8 @@ class ForgeStatusBar(Static):
     def render(self) -> Text:
         parts: list[Text] = []
         for key, label in self._bindings:
-            parts.append(Text(f" {key} ", style="bold #b8860b on #333"))
-            parts.append(Text(f" {label} ", style="#aaa"))
+            parts.append(Text(f" {key} ", style="bold #b8860b on #333333"))
+            parts.append(Text(f" {label} ", style="#aaaaaa"))
             parts.append(Text("  "))
         result = Text()
         for p in parts:
