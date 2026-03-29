@@ -1,6 +1,12 @@
-"""Entry point for python -m forge."""
+"""Entry point for python -m forge and the `forge` console script."""
 
-from forge.cli import app
+
+def main() -> None:
+    from forge.app import ForgeApp
+
+    app = ForgeApp()
+    app.run()
+
 
 if __name__ == "__main__":
-    app()
+    main()

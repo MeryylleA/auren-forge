@@ -119,9 +119,10 @@ def test_loss_spike_detection(session):
     for i in range(60):
         monitor.on_step(step=i, loss=1.0)
 
-    # Now trigger a spike
+    # Now trigger a spike — reset debounce to well before the 300s window
     triggered.clear()
-    monitor._last_agent_wake = 0  # reset debounce
+    import time as _time
+    monitor._last_agent_wake = _time.monotonic() - 400
     monitor.on_step(step=61, loss=10.0)
     assert AnomalyType.LOSS_SPIKE in triggered
 
@@ -137,6 +138,8 @@ def test_training_complete_triggers_agent(session):
         agent_trigger_callback=fake_trigger,
         check_interval_minutes=0,
     )
+    import time as _time
+    monitor._last_agent_wake = _time.monotonic() - 400  # ensure debounce window has passed
     monitor.on_training_complete()
     assert "training_complete" in triggered
 
