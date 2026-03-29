@@ -21,6 +21,8 @@ from textual.widgets import (
     Switch,
 )
 
+from forge.screens.settings import _get_radio_index
+
 from forge.config import (
     RECOMMENDED_MODELS,
     AgentConfig,
@@ -246,16 +248,16 @@ class SetupScreen(Screen):
 
     def _get_dataset_format(self) -> str:
         radio = self.query_one("#radio-format", RadioSet)
-        idx = radio.pressed_index
+        idx = _get_radio_index(radio)
         return ["auto", "alpaca", "sharegpt", "custom"][idx] if idx >= 0 else "auto"
 
     def _get_provider(self) -> str:
         radio = self.query_one("#radio-provider", RadioSet)
-        return "ollama" if radio.pressed_index == 1 else "openrouter"
+        return "ollama" if _get_radio_index(radio) == 1 else "openrouter"
 
     def _get_autonomy(self) -> str:
         radio = self.query_one("#radio-autonomy", RadioSet)
-        idx = radio.pressed_index
+        idx = _get_radio_index(radio)
         return ["monitor", "suggest", "auto"][idx] if idx >= 0 else "suggest"
 
     def _finish_setup(self) -> None:
