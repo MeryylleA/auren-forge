@@ -225,13 +225,31 @@ class SetupScreen(Screen):
         if not source:
             result_widget.update("[red]Please enter a dataset source.[/red]")
             return
-        result_widget.update("[dim]Validating...[/dim]")
 
+        btn = self.query_one("#btn-validate", Button)
+        btn.disabled = True
+        btn.label = "Validating…"
+        result_widget.update("[dim]⏳ Connecting to dataset…[/dim]")
+
+        fmt = self._get_dataset_format()
+        self.run_worker(
+            lambda: self._run_validation(source, fmt),
+            thread=True,
+            name="validate-dataset",
+        )
+
+    def _run_validation(self, source: str, fmt: str) -> dict:
         from forge.dataset import DatasetHandler
         handler = DatasetHandler()
-        fmt = self._get_dataset_format()
-        try:
-            result = handler.validate(source=source, fmt=fmt)
+        return handler.validate(source=source, fmt=fmt)
+
+    def on_worker_state_changed(self, event) -> None:
+        from textual.worker import WorkerState
+        if event.worker.name != "validate-dataset":
+            return
+        if event.state == WorkerState.SUCCESS:
+            result = event.worker.result
+            result_widget = self.query_one("#validation-result", Static)
             if result["valid"]:
                 result_widget.update(
                     f"[green]✓ Valid: {result['format']} format, "
@@ -243,8 +261,15 @@ class SetupScreen(Screen):
                     f"[yellow]⚠ {result.get('num_rows', 0):,} samples, "
                     f"issues: {issues}[/yellow]"
                 )
-        except Exception as e:
-            result_widget.update(f"[red]✗ Error: {e}[/red]")
+        elif event.state == WorkerState.ERROR:
+            self.query_one("#validation-result", Static).update(
+                f"[red]✗ Error: {event.worker.error}[/red]"
+            )
+        else:
+            return
+        btn = self.query_one("#btn-validate", Button)
+        btn.disabled = False
+        btn.label = "Validate Dataset"
 
     def _get_dataset_format(self) -> str:
         radio = self.query_one("#radio-format", RadioSet)
