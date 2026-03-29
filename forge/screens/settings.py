@@ -11,6 +11,21 @@ from textual.widgets import Button, Header, Input, Label, RadioButton, RadioSet,
 from forge.widgets.status_bar import ForgeStatusBar
 
 
+def _select_radio(radio_set: RadioSet, index: int) -> None:
+    """Select a RadioButton by index within a RadioSet."""
+    buttons = list(radio_set.query(RadioButton))
+    for i, btn in enumerate(buttons):
+        btn.value = i == index
+
+
+def _get_radio_index(radio_set: RadioSet) -> int:
+    """Get the index of the currently pressed RadioButton, or -1."""
+    for i, btn in enumerate(radio_set.query(RadioButton)):
+        if btn.value:
+            return i
+    return -1
+
+
 class SettingsScreen(Screen):
     """Edit and save global auren-forge settings."""
 
@@ -86,7 +101,7 @@ class SettingsScreen(Screen):
         provider = settings.get("default_provider", "openrouter")
         radio = self.query_one("#radio-default-provider", RadioSet)
         if provider == "ollama":
-            radio.pressed_index = 1
+            _select_radio(radio, 1)
 
         or_key = settings.get("openrouter_api_key", "")
         if or_key:
@@ -101,16 +116,20 @@ class SettingsScreen(Screen):
         autonomy = settings.get("default_autonomy", "suggest")
         autonomy_radio = self.query_one("#radio-default-autonomy", RadioSet)
         idx = {"monitor": 0, "suggest": 1, "auto": 2}.get(autonomy, 1)
-        autonomy_radio.pressed_index = idx
+        _select_radio(autonomy_radio, idx)
 
         bell = settings.get("terminal_bell", True)
         self.query_one("#switch-bell", Switch).value = bell
 
     def _collect_settings(self) -> dict:
-        provider_idx = self.query_one("#radio-default-provider", RadioSet).pressed_index
+        provider_idx = _get_radio_index(
+            self.query_one("#radio-default-provider", RadioSet)
+        )
         provider = "ollama" if provider_idx == 1 else "openrouter"
 
-        autonomy_idx = self.query_one("#radio-default-autonomy", RadioSet).pressed_index
+        autonomy_idx = _get_radio_index(
+            self.query_one("#radio-default-autonomy", RadioSet)
+        )
         autonomy = ["monitor", "suggest", "auto"][autonomy_idx] if autonomy_idx >= 0 else "suggest"
 
         return {
